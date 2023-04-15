@@ -65,7 +65,7 @@ function [phase_list,z_target] = dispersion(x,y,z,list_amp,directory_r,prefix,h1
     
     %% 3. Scan the dispersion coefficients a = [a_1; a_2; a_3]
     % First, find the normalization coefficients
-    I_a = sum(Psi,2); % Sum all the rows of Psi together, we obtain the image before dispersion compensation
+    I_a = abs(sum(Psi,2)).^2; % Sum all the rows of Psi together, we obtain the image before dispersion compensation
     I0 = max(I_a,[],'all')/1000; % Normalization coefficient
     
     % Sweep a1 (longitudinal shift coefficient)

@@ -6,7 +6,7 @@ function wavefront_correction(x,y,r_z,division_step,n_division,Z,zone_id,subvolu
     
     % Inputs: 
     % x,y spatial coordinates of the zone
-    % r_z: updated depth-resolved reflection matrix of the bigger zone containing this zone
+    % r_z: updated time-gated reflection matrix of the bigger zone containing this zone
     % Z: Zernike matrix of this zone
     Nx = length(x);
     Ny = length(y);

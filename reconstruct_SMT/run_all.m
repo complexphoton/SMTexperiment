@@ -174,17 +174,17 @@ if im_case == "3D"
     [list_z, list_z_im] = zoning_z(z,dz,dz_im,n_sub,overlap2); % list_z is a cell containing the z of each
 end
 
-%% II. Compensate dispersion then build the depth-resolved matrices
+%% II. Compensate dispersion then build the time-gated matrices
 begin_compensation = tic;
 if im_case == "2D"
     fprintf("Correcting dispersion. \n")
     [phase_list, z_target] = dispersion(x,y,z,list_amp,directory_r,prefix,h1,z_mirror,coef_n1,coef_n2,list_k0,k,im_case,directory_save);
-    fprintf("Building depth-resolved matrices. \n")
+    fprintf("Building time-gated matrices. \n")
     build_r_z_2D(z_target,list_amp,phase_list,directory_r,prefix,h1,z_mirror,coef_n1,coef_n2,list_k0,directory_save,k);
 elseif im_case == "3D"
     fprintf("Correcting dispersion. \n")
     [phase_list, ~] = dispersion(x,y,z,list_amp,directory_r,prefix,h1,z_mirror,coef_n1,coef_n2,list_k0,k,im_case,directory_save);
-    frintf("Building depth-resolved matrices. \n")    
+    frintf("Building time-gated matrices. \n")    
     build_r_z_3D(list_z,list_amp,phase_list,directory_r,prefix,h1,z_mirror,coef_n1,coef_n2,list_k0,directory_save,k);
 end
 % After this step, we obtain r_z, but it will be saved then cleared. The
