@@ -1,4 +1,4 @@
-# SMT_exp
+# SMT Experiment
 
 **SMT** (Scattering Matrix Tomography) uses scattering matrices to achieve high-resolution deep imaging inside scattering media with confocal spatio-temporal gates, digital pulse compression, refractive-index mismath correction, and additional wavefront corrections for bot input and output.
 
