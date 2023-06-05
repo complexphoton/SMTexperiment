@@ -59,7 +59,7 @@ function build_zernike(k0_max,k,NA,division_step,rad_order,directory_save,l_zone
         % 2.1. Build new k space
         dk = abs(k(1,2)-k(2,2));
         dk_zone = sqrt(2)*pi/l_zone; % Spacing in k space
-        kx_zone = -kt_max:dk_zone:kt_max; % New list of kx and ky
+        kx_zone = -kt_max+dk_zone:dk_zone:kt_max; % New list of kx and ky
         ky_zone = kx_zone;
         N = length(kx_zone); % Number of new kx or ky
         k_zone = zeros(N^2,2); % Initialize the list of new kx and ky. 1st column is kx, 2nd column is ky
