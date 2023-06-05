@@ -52,8 +52,9 @@ dz = 0.5; dz_im = 0.2;
 
 % 7. The image is divided into smaller zones during the wavefront
 % correction procedure. Those zones are overlapped. Specify the
-% half-of-overlapping-area here (micron)
-overlap2 = 1.8; 
+% half-of-overlapping-area here (micron). The overlapping region of 
+% two adjacent zones is 2*overlap2
+overlap2 = 1.2; 
 
 % 8. Specify the imaging case, either 2D or 3D. If 2D, after correcting the
 % dispersion, we need to find the target's depth, and when reconstructing
@@ -124,7 +125,7 @@ z_im = lz_offset-lz_im/2+dz_im/2:dz_im:lz_offset+lz_im/2;
 % 1.2. Build Zernike matrix for the full image
 division_step = 0;
 rad_order = rad_order_start+rad_order_inc*division_step; % Number of radial orders
-build_zernike(k0_max,k,NA,division_step,rad_order,directory_save);
+build_zernike(k0_max,k,NA,division_step,rad_order,directory_save,lx_im);
 
 % 2. Divide the image into zones, obtaining the list of x,y,z for each
 % division step. Each list will be stored in a 2D cell. Each column of the
@@ -155,7 +156,8 @@ for division_step = 1:n_division
     % "directory_save/Z_"+division_step+"_re.mat". The list of k in the new
     % k space will be saved as "directory_save/k_"+division_step+".mat".
     rad_order = rad_order_start+rad_order_inc*division_step; % Number of radial orders
-    build_zernike(k0_max,k,NA,division_step,rad_order,directory_save);
+    l_zone = max(list_x{1,division_step},[],'all')-min(list_x{1,division_step},[],'all');
+    build_zernike(k0_max,k,NA,division_step,rad_order,directory_save,l_zone);
     % In this function, k0_max*NA is the maximum k_parallel, which is used
     % to normalize the k space, k is the list of original k_parallel, which
     % is used to optimize the full 2D image, as well as image

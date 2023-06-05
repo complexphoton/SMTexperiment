@@ -1,6 +1,6 @@
 % This function builds the Zernike wavefront matrices for both optimization
 % and reconstruction
-function build_zernike(k0_max,k,NA,division_step,rad_order,directory_save)
+function build_zernike(k0_max,k,NA,division_step,rad_order,directory_save,l_zone)
     %% 1. Build the Zernike matrix for reconstruction
     
     % 1.1. Build the normalized polar k space
@@ -58,7 +58,7 @@ function build_zernike(k0_max,k,NA,division_step,rad_order,directory_save)
     else
         % 2.1. Build new k space
         dk = abs(k(1,2)-k(2,2));
-        dk_zone = dk*(sqrt(2)^division_step); % New spacing in k space
+        dk_zone = sqrt(2)*pi/l_zone; % Spacing in k space
         kx_zone = -kt_max:dk_zone:kt_max; % New list of kx and ky
         ky_zone = kx_zone;
         N = length(kx_zone); % Number of new kx or ky
