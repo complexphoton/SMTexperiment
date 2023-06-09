@@ -156,7 +156,7 @@ for division_step = 1:n_division
     % "directory_save/Z_"+division_step+"_re.mat". The list of k in the new
     % k space will be saved as "directory_save/k_"+division_step+".mat".
     rad_order = rad_order_start+rad_order_inc*division_step; % Number of radial orders
-    l_zone = max(list_x{1,division_step},[],'all')-min(list_x{1,division_step},[],'all');
+    l_zone = max(list_x{1,division_step+1},[],'all')-min(list_x{1,division_step+1},[],'all');
     build_zernike(k0_max,k,NA,division_step,rad_order,directory_save,l_zone);
     % In this function, k0_max*NA is the maximum k_parallel, which is used
     % to normalize the k space, k is the list of original k_parallel, which
