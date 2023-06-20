@@ -72,8 +72,8 @@ n_division = single(1);
 % polynomials. After each optimization step, we increase the number of
 % Zernike modes. Specify the number of Zernike radial orders to start from
 % and the number of incremental Zernike radial orders
-rad_order_start = single(13);
-rad_order_inc = single(6);
+rad_order_start = single(11);
+rad_order_inc = single(4);
 
 % 11. List of laser amplitude at all frequencies
 list_amp = single(load(""+directory_r+"/list_amp_3D_single.mat").list_amp);
