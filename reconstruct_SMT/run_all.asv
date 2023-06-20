@@ -291,9 +291,8 @@ if im_case == "2D"
 elseif im_case == "3D"
     [I] = reconstruct3D(list_x_im,list_y_im,list_z_im,x_im,y_im,z_im,overlap2,k,list_k0,phase_list,list_amp,coef_n1,coef_n2,h1,z_mirror,n_division,directory_r,prefix,directory_save); 
     %% Choose the z (depth, in pixel coordinate) to display 
-    % Number of z we want to show
-    n_z_show = 10;
-    z_display = round(length(z_im)/(n_z_show+1)*[1:1:n_z_show]);
+    % Number of z we want to sh
+    z_display = [round(length(z_im)/5) 2*round(length(z_im)/5) 3*round(length(z_im)/5) 4*round(length(z_im)/5)];
     for ii = z_display
         I_z = I(:,:,ii);
         I_z = I_z/max(I_z,[],'all');

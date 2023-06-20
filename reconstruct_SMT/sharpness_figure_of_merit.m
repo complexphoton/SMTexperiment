@@ -10,12 +10,14 @@ function [M,grad] = sharpness_figure_of_merit(a, F, Z)
     psi = F*exp(1i*phi);
     I = abs(psi).^2;
     
-    global M
+    global M 
     
-    M = -sum(I.*log(I),'all');
+    M = single(-sum(I.*log(I),'all'));
+    
+    a = double(a);
     
 % Calculate the gradient
     if nargout>1
-        grad = 2*imag(((log(I)+1).*(psi))'*F.*(exp(1i*phi.')))*Z;    
+        grad = double(2*imag(((log(I)+1).*(psi))'*F.*(exp(1i*phi.')))*Z); 
     end
 end

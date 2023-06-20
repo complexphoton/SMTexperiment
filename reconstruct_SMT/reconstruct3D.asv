@@ -17,7 +17,7 @@ function [I] = reconstruct3D(list_x_im,list_y_im,list_z_im,x_im,y_im,z_im,overla
     freqc = 3e2*list_k0(round(n_freq/2))/2/pi; % The central frequency
     % Scan each frequency and build the volumetric image at each frequency
     for i_freq = 1:n_freq
-       
+        fprintf("Working with frequency"+i_freq+"\n")
         k0 = list_k0(i_freq); freq = 3e2*k0/2/pi; dfreq = freq - freqc; 
         
         % The refractive indices of glass and the medium at the
@@ -26,7 +26,7 @@ function [I] = reconstruct3D(list_x_im,list_y_im,list_z_im,x_im,y_im,z_im,overla
         n_media = coef_n2(1) + coef_n2(2)*dfreq + coef_n2(3)*dfreq.^2 + coef_n2(4)*dfreq.^3 + coef_n2(5)*dfreq.^4;
         
          % Load the reflection matrix at this frequency
-        r = load(""+directory_r+""+prefix+""+i_freq+"_single_precision.mat").r_pad;
+        r = load(""+directory_r+""+prefix+""+i_freq+"_"+accuracy+"_single_precision.mat").r_pad;
         
         % Find kz and Fourier components fz 
         % In air
@@ -43,10 +43,10 @@ function [I] = reconstruct3D(list_x_im,list_y_im,list_z_im,x_im,y_im,z_im,overla
         fz = kz_out-kz_in;
         
         % Correct index mismatch
-        r = r(:).*exp(1i.*mod(-fz0(:)*z_mirror+fz1(:)*h1,2*pi));
+        r = r(:).*exp(1i.*(-fz0(:)*z_mirror+fz1(:)*h1));
         
         % Compensate dispersion and normalize with laser amplitude
-        r = r.*exp(-1i*wrapToPi(phase_list(i_freq)))./list_amp(i_freq);
+        r = r.*exp(-1i*phase_list(i_freq))./list_amp(i_freq);
         r = reshape(r,N,N);
         
         % Update the reflection matrix with the phase correction of the
@@ -58,9 +58,6 @@ function [I] = reconstruct3D(list_x_im,list_y_im,list_z_im,x_im,y_im,z_im,overla
             Nz = length(z); % Number of pixels in z of the zone
             % Build the single-frequency image of each zone in the subvolume
             for zone_id = 1:n_zone
-                
-                fprintf("Working with frequency"+i_freq+", subvolume "+subvolume_id+", zone "+zone_id+"\n")
-                
                 % Zone coordinate
                 x = list_x_im{zone_id,n_division+1};
                 y = list_y_im{zone_id,n_division+1};
@@ -82,7 +79,7 @@ function [I] = reconstruct3D(list_x_im,list_y_im,list_z_im,x_im,y_im,z_im,overla
                     end
                     c_in_step = load(""+directory_save+"c_in_"+division_step+"_zone_"+zone+"_subvolume_"+subvolume_id+".mat").c_in;
                     c_out_step = load(""+directory_save+"c_out_"+division_step+"_zone_"+zone+"_subvolume_"+subvolume_id+".mat").c_out;
-                    Z_step = single(load(""+directory_save+"Z_"+division_step+"_re.mat").Z_re);
+                    Z_step = load(""+directory_save+"Z_"+division_step+"_re.mat").Z_re;
                     phi_in_step = Z_step*c_in_step;
                     phi_out_step = Z_step*c_out_step;
                     phi_in = phi_in+phi_in_step;
