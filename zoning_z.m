@@ -1,6 +1,6 @@
 % This function divide the volumetric image into smaller subvolumes along
 % the z axis
-function [list_z, list_z_im] = zoning_z(z,dz,dz_im,n_sub,overlap2)
+function [list_z, list_z_im] = zoning_z(z,dz,dz_im,n_sub,overlap2,z_im)
     %% Thickness of the image
     l = length(z)*dz;
     % Half size of the overlap
