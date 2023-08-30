@@ -4,6 +4,12 @@
 % thickness, depth of the reference mirror, list of laser amplitudes at all
 % frequencies, NA of the system.
 
+% The below configuration belongs to the 3D image scenario. For the 2D case,
+% the parameters should be: lz_offset = 994.5; lz_im = 60; h1 = 141.5; 
+% z_mirror = 820; n_division = 3; n_sub = 1; 
+% the path to list_k0, k, coef_n1, coef_n2, list_amp,... should also be 
+% modified accordingly.
+
 clear 
 clc
 
