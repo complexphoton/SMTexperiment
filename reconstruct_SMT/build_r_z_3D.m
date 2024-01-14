@@ -17,7 +17,7 @@ function build_r_z_3D(list_z,list_amp,phase_list,directory_r,prefix,h1,z_mirror,
     R_z = cell(n_sub,1);
     for id_sub = 1:n_sub
         % List of z that is corrected in this subvolume
-        z_sub = list_z{id_sub};
+        z_sub = list_z{id_sub}; Nz_sub = length(z_sub); z_center = z_sub(round(Nz_sub));
         list_z_subvolume = linspace(z_sub(1),z_sub(end),n_slice).'; 
         r_z = zeros(N*n_slice,N);
         for i_freq = 1:n_freq
