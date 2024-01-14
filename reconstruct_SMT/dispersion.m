@@ -39,7 +39,7 @@ function [phase_list,z_target] = dispersion(x,y,z,list_amp,directory_r,prefix,h1
         
         % Load the reflection matrix at this frequency
         load_data = tic;
-        r = load(""+directory_r+""+prefix+""+i_freq+"_single_precision.mat").r_pad;
+        r = load(""+directory_r+""+prefix+""+i_freq+".mat").r_pad;
         toc(load_data);
         
         % Find kz and Fourier components fz 
@@ -88,38 +88,44 @@ function [phase_list,z_target] = dispersion(x,y,z,list_amp,directory_r,prefix,h1
     % Sweep a1 (longitudinal shift coefficient)
     list_M_a1 = []; % List of FOM with different a1
 
-    for a1 = -1000:10:1000
+    for a1 = -550:10:350
         phase_a1 = Omega(:,1)*a1;
         I_a1 = single(abs(Psi*exp(-1i*phase_a1)).^2); % Image with the corresponding a1
         M_a1 = sum(I_a1.*log(I_a1/I0),'all');
         list_M_a1 = [list_M_a1 [M_a1;a1]]; 
         clear psi_a1
+        figure(10)
+        plot(list_M_a1(2,:),list_M_a1(1,:))
     end
     % Find the coefficient that gives the highest sharpness
     a1_max = list_M_a1(2,list_M_a1(1,:)==max(list_M_a1(1,:)));
-
+    
     % Sweep a2 (controlling width of the pulse)
     list_M_a2 = []; % List of FOM with different a2
 
-    for a2 = -1000:10:1000
+    for a2 = -1500:10:1500
         phase_a2 = Omega(:,1:2)*[a1_max; a2];
         I_a2 = single(abs(Psi*exp(-1i*phase_a2)).^2); % Image with the corresponding a2 and a1 fixed at a1_max
         M_a2 = sum(I_a2.*log(I_a2/I0),'all');
         list_M_a2 = [list_M_a2 [M_a2;a2]]; 
         clear psi_a2
+        figure(10)
+        plot(list_M_a2(2,:),list_M_a2(1,:))
     end
     % Find the coefficient that gives the highest sharpness
     a2_max = list_M_a2(2,list_M_a2(1,:)==max(list_M_a2(1,:)));
-
+    
     % Sweep a3 (asymmetric pulse deformation)
     list_M_a3 = []; % List of FOM with different a3
 
-    for a3 = -1000:10:1000
+    for a3 = -1000:5:1000
         phase_a3 = Omega*[a1_max; a2_max; a3];
         I_a3 = single(abs(Psi*exp(-1i*phase_a3)).^2); % Image with the corresponding a3 and a1, a2 fixed at a1_max, a2_max
         M_a3 = sum(I_a3.*log(I_a3/I0),'all');
         list_M_a3 = [list_M_a3 [M_a3;a3]]; 
         clear psi_a3
+        figure(10)
+        plot(list_M_a3(2,:),list_M_a3(1,:))
     end
     % Find the coefficient that gives the highest sharpness
     a3_max = list_M_a3(2,list_M_a3(1,:)==max(list_M_a3(1,:)));
@@ -156,12 +162,11 @@ function [phase_list,z_target] = dispersion(x,y,z,list_amp,directory_r,prefix,h1
         for ii = 1:Nz % Scan each depth and find the FOM of the 2D images
             I_2D = abs(psi_cor(:,:,ii).^2);
             M = sum(I_2D.*log(I_2D/I0),'all');
-            list_M = [list_M M];    
+            list_M = [list_M M];  
         end
         % Search for target depth
         z_target = z(list_M == max(list_M,[],'all'));
     elseif im_case == "3D"
         z_target = [];
     end
-    clear Psi Omega psi_s psi_cor
 end

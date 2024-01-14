@@ -25,82 +25,82 @@ begin_all = tic;
 
 lx_offset = single(25); lx_im = single(50);
 ly_offset = single(25); ly_im = single(50);
-lz_offset = single(1220); lz_im = single(110);
+lz_offset = single(1525); lz_im = single(110);
 
 % 2. Provide the path to input data. We recommend saving all required input 
 % data at the same directory, including the reflection matrices, k list, k0 
 % list, dispersion coefficients of glass and sample, etc
-directory_r = ["/media/minh/Data/Imaging scatter media/Aberration correction project/Yiwen's paper data/3D/"];
+directory_r = ["/media/minh/WD_BLACK/SMT 3D Tb3 1350 and 1150/Tb3 1150/"];
 
 % 3. List of k0 at all frequencies.
-list_k0 = single(load(""+directory_r+"list_k0_3D_single.mat").list_k0);
+list_k0 = single(load(""+directory_r+"list_k0.mat").list_k0);
 k0_max = max(list_k0,[],'all');
 
-% 3. Dispersion coefficients of glass is coef_n1 and sample is coef_n2
-coef_n1 = single(load(""+directory_r+"coef_n1_single.mat").coef_n1);
-coef_n2 = single(load(""+directory_r+"coef_n2_3D_single.mat").coef_n2);
+% 4. Dispersion coefficients of glass is coef_n1 and sample is coef_n2
+coef_n1 = single(load(""+directory_r+"coef_n1.mat").coef_n1);
+coef_n2 = single(load(""+directory_r+"coef_n2_3D.mat").coef_n2);
 
-% 4. Thickness of the coverslip h1 and mirror depth z_mirror (micron)
-h1 = single(148); z_mirror = single(934);
+% 5. Thickness of the coverslip h1 and mirror depth z_mirror (micron)
+h1 = single(154); z_mirror = single(1150);
 
-% 5. In our case, ehe reflection matrices are stored in "/directory_r/" as
+% 6. In our case, ehe reflection matrices are stored in "/directory_r/" as
 % ("/prefix"-frequency_id-".mat").r_pad. So we also need to specify 
 % the prefix. Also, for the best convenience, in the future, before using
 % this code, change the name of the file containing the reflection matrices
 % into that format
-prefix = "r_pad_3D_freq_";
+prefix = "r_pad_";
 
-% 6. Specify the pixel size. % Pixel size dx = dy, dz when running the
+% 7. Specify the pixel size. % Pixel size dx = dy, dz when running the
 % optimization. When reconstructing the image, we can use a different pixel
 % size dx_im = dy_im, dz_im (micron)
-dx = single(0.5); dx_im = single(0.2);
-dz = single(0.5); dz_im = single(0.2);
+dx = single(0.7); dx_im = single(0.2);
+dz = single(1); dz_im = single(0.2);
 
-% 7. The image is divided into smaller zones during the wavefront
+% 8. The image is divided into smaller zones during the wavefront
 % correction procedure. Those zones are overlapped. Specify the
 % half-of-overlapping-area here (micron)
 overlap2 = single(1.2); 
 
-% 8. Specify the imaging case, either 2D or 3D. If 2D, after correcting the
+% 9. Specify the imaging case, either 2D or 3D. If 2D, after correcting the
 % dispersion, we need to find the target's depth, and when reconstructing
 % the image, we only have to reconstruct a 2D image
 im_case = "3D";
 
 % If the case is "3D", we need to specify the number of subvolumes in the z
 % axis. If "2D" then the number of subvolumes is 1
-n_sub = single(7);
+n_sub = single(8);
 
-% 9. The image will go through one correction of the full image, then
+% 10. The image will go through one correction of the full image, then
 % n_divison division steps
 n_division = single(1);
 
-% 10. At each optimization step, we optimize a certain number of Zernike
+% 11. At each optimization step, we optimize a certain number of Zernike
 % polynomials. After each optimization step, we increase the number of
 % Zernike modes. Specify the number of Zernike radial orders to start from
 % and the number of incremental Zernike radial orders
 rad_order_start = single(11);
 rad_order_inc = single(4);
 
-% 11. List of laser amplitude at all frequencies
-list_amp = single(load(""+directory_r+"/list_amp_3D_single.mat").list_amp);
+% 12. List of laser amplitude at all frequencies
+list_amp = single(load(""+directory_r+"/list_amp.mat").list_amp_ave);
 
-% 12. Specify a saving directory to store the intermediate variables which
+% 13. Specify a saving directory to store the intermediate variables which
 % can be very heavy. We will store those heavy intermediate variables after
 % obtaining them, then clear them.
-directory_save = ["/media/minh/Data/Imaging scatter media/Aberration correction project/Yiwen's paper data/3D/Intermediate result/"];
+directory_save = ["/media/minh/WD_BLACK/SMT 3D Tb3 1350 and 1150/Tb3 1150/Intermediate result/"];
 
-% 13. Specify the list of k_parallel_in and k_parallel_out (kin/out_x/y).
+% 14. Specify the list of k_parallel_in and k_parallel_out (kin/out_x/y).
 % When saving these k, please save them as a nx2 matrix where the first
 % column is kx, the 2nd column is ky. For each constant value of kx, the
 % values of ky increases from negative to positive. Arranging like that
 % helps us easily find the spacing in k space. The reflection matrices are
 % also arranged in that order.
-k = single(load(""+directory_r+"kout_max_3D_single.mat").kout_max);
+k = single(load(""+directory_r+"k.mat").k);
 
-% 14. NA of the system
+% 15. NA of the system
 NA = single(0.5);
 
-% 15. % The outer part of the image is always darker than the central part
+% 16. The outer part of the image is always darker than the central part
 % due to vignetting. To compensate, we multiply the image with a
 % Gaussian mask with the following parameters
 x0 = single(30); y0 = single(22); % Central of the mask
@@ -110,22 +110,25 @@ rho = single(0);
 % [exp(-1/(2*(1-rho^2))*(((gridX-x0)/wx0).^2+((gridY-y0)/wy0).^2)-...
 % 2*rho.*(gridX-x0)/wx0.*(gridY-y0)/wy0)'.^2
 
+% 17. If doing 3D imaging, how many slices per subvolume do we want to optimize
+n_slice = 5;
+
 % That's all one need to put in in order to reconstruct the fully corrected
 % image. 
 
-%% I. System coordinates, zoning, Zernike matrices
+% I. System coordinates, zoning, Zernike matrices
 
 fprintf("System coordinates, zoning, Zernike matrices.\n")
 
 % 1. Dealing with the full image
 % 1.1. Below is the lists of coordinate x, y, z when running the computation
 % and x_im, y_im, z_im when reconstructing the image
-x = single(lx_offset-lx_im/2+dx/2:dx:lx_offset+lx_im/2);
-y = single(ly_offset-ly_im/2+dx/2:dx:ly_offset+ly_im/2);
-z = single(lz_offset-lz_im/2+dz/2:dz:lz_offset+lz_im/2);
-x_im = single(lx_offset-lx_im/2+dx_im/2:dx_im:lx_offset+lx_im/2);
-y_im = single(ly_offset-ly_im/2+dx_im/2:dx_im:ly_offset+ly_im/2);
-z_im = single(lz_offset-lz_im/2+dz_im/2:dz_im:lz_offset+lz_im/2);
+x = single(lx_offset-lx_im/2+dx/2:dx:lx_offset+lx_im/2); Nx = length(x);
+y = single(ly_offset-ly_im/2+dx/2:dx:ly_offset+ly_im/2); Ny = length(y);
+z = single(lz_offset-lz_im/2+dz/2:dz:lz_offset+lz_im/2); Nz = length(z);
+x_im = single(lx_offset-lx_im/2+dx_im/2:dx_im:lx_offset+lx_im/2); Nx_im = length(x_im);
+y_im = single(ly_offset-ly_im/2+dx_im/2:dx_im:ly_offset+ly_im/2); Ny_im = length(y_im);
+z_im = single(lz_offset-lz_im/2+dz_im/2:dz_im:lz_offset+lz_im/2); Nz_im = length(z_im);
 
 % 1.2. Build Zernike matrix for the full image. This matrix needs to be
 % build as double precision to avoid overflowing at very high orders
@@ -201,7 +204,7 @@ elseif im_case == "3D"
     toc(dispersion_begin)
     precompute = tic;
     fprintf("Building time-gated matrices. \n")    
-    build_r_z_3D(list_z,list_amp,phase_list,directory_r,prefix,h1,z_mirror,coef_n1,coef_n2,list_k0,directory_save,k);
+    build_r_z_3D(list_z,list_amp,phase_list,directory_r,prefix,h1,z_mirror,coef_n1,coef_n2,list_k0,n_slice,n_sub,directory_save,k);
     toc(precompute)
 end
 % After this step, we obtain r_z, but it will be saved then cleared. The
@@ -222,7 +225,7 @@ for subvolume_id = 1:n_sub
     if im_case == "2D"
         r_z = single(load(""+directory_save+"r_z_2D.mat").r_z);
     elseif im_case == "3D"
-        r_z = load(""+directory_save+"r_z_3D_"+subvolume_id+".mat").r_z;
+        r_z = load(""+directory_save+"r_z_3D_"+subvolume_id+"_"+n_slice+"_slices.mat").r_z;
     end
     % Variable division_step = 0 means we are not doing any zone division
     % yet. Variable zone_id = 1 since there is only one zone, which is the
@@ -236,7 +239,11 @@ for subvolume_id = 1:n_sub
     % truncated spatial basis (if division_step > 0) then convert back,
     % optimize Zernike coefficients alternatively.
     opt_whole_image = tic;
-    wavefront_correction(x,y,r_z,division_step,Z,zone_id,subvolume_id,directory_save);
+    if im_case == "3D"
+        wavefront_correction_3D(x,y,r_z,n_slice,division_step,Z,zone_id,subvolume_id,directory_save);
+    elseif im_case == "2D"
+        wavefront_correction_2D(x,y,r_z,division_step,Z,zone_id,subvolume_id,directory_save);
+    end
     toc(opt_whole_image)
     % The input Zernike coefficients will be stored as the following format
     % "/directory_save/c_in_"+division_step+"_zone_"+zone_id+"_subvolume_"+subvolume_id+".mat".
@@ -262,12 +269,16 @@ for subvolume_id = 1:n_sub
             zone_big = ceil(zone_id/4);
             % Load the updated r matrix of the corresponding bigger zone
             prev_step = division_step-1;
-            r_big = single(load(""+directory_save+"r_update_"+prev_step+"_zone_"+zone_big+"_subvolume_"+subvolume_id+".mat").r_update);
+            r_big = single(load(""+directory_save+"r_update_"+prev_step+"_zone_"+zone_big+"_subvolume_"+subvolume_id+"_"+n_slice+"_slices.mat").r_update);
             % The corresponding x and y of the zone is
             x_zone = list_x{zone_id,division_step+1};
             y_zone = list_y{zone_id,division_step+1};
             % Correct the wavefront of the zone
-            wavefront_correction(x_zone,y_zone,r_big,division_step,Z,zone_id,subvolume_id,directory_save);
+            if im_case == "3D"
+                wavefront_correction_3D(x_zone,y_zone,r_big,n_slice,division_step,Z,zone_id,subvolume_id,directory_save);
+            elseif im_case == "2D"
+                wavefront_correction_2D(x_zone,y_zone,r_big,division_step,Z,zone_id,subvolume_id,directory_save);
+            end
         end
         toc(opt_division_step)
     end
@@ -296,18 +307,32 @@ if im_case == "2D"
     set(gca,'Visible','off')
 elseif im_case == "3D"
     [I] = reconstruct3D(list_x_im,list_y_im,list_z_im,x_im,y_im,z_im,overlap2,k,list_k0,phase_list,list_amp,coef_n1,coef_n2,h1,z_mirror,n_division,directory_r,prefix,directory_save); 
-    %% Choose the z (depth, in pixel coordinate) to display 
+    % Choose the z (depth, in pixel coordinate) to display 
     % Number of z we want to show
-    n_z_show = 10;
+    n_z_show = n_sub;
     z_display = round(length(z_im)/(n_z_show+1)*[1:1:n_z_show]);
     for ii = z_display
         I_z = I(:,:,ii);
         I_z = I_z/max(I_z,[],'all');
         figure
-        imagesc(fliplr(I_z.*mask));
+        imagesc(fliplr(I_z));
         colormap('hot')
         axis image
         caxis([0 0.5])
+        set(gca,'Visible','off')
+    end
+    
+    % Choose the x slices to display
+    n_x_show = 4;
+    x_display = round(length(x_im)/(n_x_show+1)*[1:1:n_x_show]);
+    for ii = x_display
+        I_x = I(:,ii,:); I_x = I_x(:); I_x = reshape(I_x,Ny_im,Nz_im);
+        I_x = I_x/max(I_x,[],'all');
+        figure
+        imagesc((I_x));
+        colormap('hot')
+        axis image
+        caxis([0 0.3])
         set(gca,'Visible','off')
     end
 end

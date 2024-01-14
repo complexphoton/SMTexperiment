@@ -1,9 +1,11 @@
 % Function to reconstruct the fully corrected 2D SMT image
 function [I] = reconstruct3D(list_x_im,list_y_im,list_z_im,x_im,y_im,z_im,overlap2,k,list_k0,phase_list,list_amp,coef_n1,coef_n2,h1,z_mirror,n_division,directory_r,prefix,directory_save)
+    
     n_sub = length(list_z_im); % Number of subvolumes
     dz_im = round(abs(z_im(2)-z_im(1)),1); % Pixel size in yz
     n_zone = 2^(n_division*2); % Number of zones
     dx_im = round(abs(x_im(2)-x_im(1)),1); % Pixel size in x,y
+    Nz_im = length(z_im);
     % Input and output k:
     kout_x = k(:,1); kout_y = k(:,2);
     kin_x = k(:,1).'; kin_y = k(:,2).';
@@ -12,7 +14,7 @@ function [I] = reconstruct3D(list_x_im,list_y_im,list_z_im,x_im,y_im,z_im,overla
     fx = kout_x-kin_x;
     fy = kout_y-kin_y;
     % Build the image of each subvolume
-    Psi = zeros(length(x_im),length(y_im),length(z_im)); % Initialize the volumetric complex image
+    Psi = single(zeros(length(x_im),length(y_im),length(z_im))); % Initialize the volumetric complex image
     n_freq = length(list_k0); % Number of frequency    
     freqc = 3e2*list_k0(round(n_freq/2))/2/pi; % The central frequency
     % Scan each frequency and build the volumetric image at each frequency
@@ -26,7 +28,7 @@ function [I] = reconstruct3D(list_x_im,list_y_im,list_z_im,x_im,y_im,z_im,overla
         n_media = coef_n2(1) + coef_n2(2)*dfreq + coef_n2(3)*dfreq.^2 + coef_n2(4)*dfreq.^3 + coef_n2(5)*dfreq.^4;
         
          % Load the reflection matrix at this frequency
-        r = load(""+directory_r+""+prefix+""+i_freq+"_single_precision.mat").r_pad;
+        r = load(""+directory_r+""+prefix+""+i_freq+".mat").r_pad;
         
         % Find kz and Fourier components fz 
         % In air
@@ -69,7 +71,7 @@ function [I] = reconstruct3D(list_x_im,list_y_im,list_z_im,x_im,y_im,z_im,overla
                 [X,Y,Z] = meshgrid(x,y,z); % Make grid points
                 nx = round((x+dx_im/2)/dx_im); % Zone coordinate in pixels
                 ny = round((y+dx_im/2)/dx_im);
-                nz = round((z-list_z_im{1,1}(1)+dz_im/2)/dz_im);
+                nz = ceil((z-list_z_im{1,1}(1)+dz_im/2)/dz_im);
                 % Find the final aberration phase of the zone by summing the phase
                 % at each division step
                 phi_in = zeros(N,1); % Initialize the input and output aberration phase
@@ -80,8 +82,8 @@ function [I] = reconstruct3D(list_x_im,list_y_im,list_z_im,x_im,y_im,z_im,overla
                     else
                         zone = ceil(zone/4);
                     end
-                    c_in_step = load(""+directory_save+"c_in_"+division_step+"_zone_"+zone+"_subvolume_"+subvolume_id+".mat").c_in;
-                    c_out_step = load(""+directory_save+"c_out_"+division_step+"_zone_"+zone+"_subvolume_"+subvolume_id+".mat").c_out;
+                    c_in_step = load(""+directory_save+"c_in_"+division_step+"_zone_"+zone+"_subvolume_"+subvolume_id+"_2.mat").c_in;
+                    c_out_step = load(""+directory_save+"c_out_"+division_step+"_zone_"+zone+"_subvolume_"+subvolume_id+"_2.mat").c_out;
                     Z_step = single(load(""+directory_save+"Z_"+division_step+"_re.mat").Z_re);
                     phi_in_step = Z_step*c_in_step;
                     phi_out_step = Z_step*c_out_step;
@@ -130,5 +132,16 @@ function [I] = reconstruct3D(list_x_im,list_y_im,list_z_im,x_im,y_im,z_im,overla
     end
     % Finally, the volumetric image is
     I = abs(Psi).^2;
-    save(""+directory_save+"./I_3D.mat",'I')
+    
+    for ii = 1:Nz_im
+        I_2D = I(:,:,ii);
+        M = sum(I_2D,'all');
+        if M == 0
+            if ii ~= 1 & ii ~= Nz_im
+                I(:,:,ii) = 1/2*(I(:,:,ii+1)+I(:,:,ii-1));
+            end
+        end
+    end
+    
+    save(""+directory_save+"./I_3D_2.mat",'I')
 end
