@@ -1,6 +1,6 @@
 % Function to reconstruct the fully corrected 2D SMT image
-function [I] = reconstruct3D(list_x_im,list_y_im,list_z_im,x_im,y_im,z_im,overlap2,k,list_k0,phase_list,list_amp,coef_n1,coef_n2,h1,z_mirror,n_division,directory_r,prefix,directory_save)
-    
+function [I] = reconstruct3D(list_x_im,list_y_im,list_z_im,x_im,y_im,z_im,overlap2xy,overlap2z,k,list_k0,phase_list,list_amp,coef_n1,coef_n2,h1,z_mirror,n_division,directory_r,prefix,directory_save)
+   
     n_sub = length(list_z_im); % Number of subvolumes
     dz_im = round(abs(z_im(2)-z_im(1)),1); % Pixel size in yz
     n_zone = 2^(n_division*2); % Number of zones
@@ -18,8 +18,8 @@ function [I] = reconstruct3D(list_x_im,list_y_im,list_z_im,x_im,y_im,z_im,overla
     n_freq = length(list_k0); % Number of frequency    
     freqc = 3e2*list_k0(round(n_freq/2))/2/pi; % The central frequency
     % Scan each frequency and build the volumetric image at each frequency
-    for i_freq = 1:n_freq
-       
+    for i_freq = [1:n_freq]
+        tic
         k0 = list_k0(i_freq); freq = 3e2*k0/2/pi; dfreq = freq - freqc; 
         
         % The refractive indices of glass and the medium at the
@@ -27,7 +27,7 @@ function [I] = reconstruct3D(list_x_im,list_y_im,list_z_im,x_im,y_im,z_im,overla
         n1 = coef_n1(1) + coef_n1(2)*dfreq + coef_n1(3)*dfreq.^2 + coef_n1(4)*dfreq.^3 + coef_n1(5)*dfreq.^4;
         n_media = coef_n2(1) + coef_n2(2)*dfreq + coef_n2(3)*dfreq.^2 + coef_n2(4)*dfreq.^3 + coef_n2(5)*dfreq.^4;
         
-         % Load the reflection matrix at this frequency
+        % Load the reflection matrix at this frequency
         r = load(""+directory_r+""+prefix+""+i_freq+".mat").r_pad;
         
         % Find kz and Fourier components fz 
@@ -56,22 +56,22 @@ function [I] = reconstruct3D(list_x_im,list_y_im,list_z_im,x_im,y_im,z_im,overla
         psi_s = zeros(length(x_im),length(y_im),length(z_im)); % Initialize the single-frequency volumetric complex image
         for subvolume_id = 1:n_sub
             % z coordinate of the subvolume
-            z = list_z_im{subvolume_id,1};
-            Nz = length(z); % Number of pixels in z of the zone
+            z_sub = list_z_im{subvolume_id,1};
+            Nz_sub = length(z_sub); % Number of pixels in z of the zone
             % Build the single-frequency image of each zone in the subvolume
             for zone_id = 1:n_zone
                 
                 fprintf("Working with frequency"+i_freq+", subvolume "+subvolume_id+", zone "+zone_id+"\n")
                 
                 % Zone coordinate
-                x = list_x_im{zone_id,n_division+1};
-                y = list_y_im{zone_id,n_division+1};
-                Nx = length(x); % Number of pixels in x and y of the zone
-                Ny = length(y);
-                [X,Y,Z] = meshgrid(x,y,z); % Make grid points
-                nx = round((x+dx_im/2)/dx_im); % Zone coordinate in pixels
-                ny = round((y+dx_im/2)/dx_im);
-                nz = ceil((z-list_z_im{1,1}(1)+dz_im/2)/dz_im);
+                x_zone = list_x_im{zone_id,n_division+1};
+                y_zone = list_y_im{zone_id,n_division+1};
+                Nx_im_zone = length(x_zone); % Number of pixels in x and y of the zone
+                Ny_im_zone = length(y_zone);
+                [X_zone,Y_zone,Z_zone] = meshgrid(x_zone,y_zone,z_sub); % Make grid points
+                nx = round((x_zone+dx_im/2)/dx_im); % Zone coordinate in pixels
+                ny = round((y_zone+dx_im/2)/dx_im);
+                nz = ceil((z_sub-list_z_im{1,1}(1)+dz_im/2)/dz_im);
                 % Find the final aberration phase of the zone by summing the phase
                 % at each division step
                 phi_in = zeros(N,1); % Initialize the input and output aberration phase
@@ -82,8 +82,8 @@ function [I] = reconstruct3D(list_x_im,list_y_im,list_z_im,x_im,y_im,z_im,overla
                     else
                         zone = ceil(zone/4);
                     end
-                    c_in_step = load(""+directory_save+"c_in_"+division_step+"_zone_"+zone+"_subvolume_"+subvolume_id+"_2.mat").c_in;
-                    c_out_step = load(""+directory_save+"c_out_"+division_step+"_zone_"+zone+"_subvolume_"+subvolume_id+"_2.mat").c_out;
+                    c_in_step = load(""+directory_save+"c_in_"+division_step+"_zone_"+zone+"_subvolume_"+subvolume_id+"_out_of_"+n_sub+".mat").c_in;
+                    c_out_step = load(""+directory_save+"c_out_"+division_step+"_zone_"+zone+"_subvolume_"+subvolume_id+"_out_of_"+n_sub+".mat").c_out;
                     Z_step = single(load(""+directory_save+"Z_"+division_step+"_re.mat").Z_re);
                     phi_in_step = Z_step*c_in_step;
                     phi_out_step = Z_step*c_out_step;
@@ -93,33 +93,34 @@ function [I] = reconstruct3D(list_x_im,list_y_im,list_z_im,x_im,y_im,z_im,overla
                 % Update the reflection matrix
                 r_zone = exp(1i*phi_out).*r.*exp(1i*phi_in.');
                 % Build the single-frequency zone image
-                psi_zone = finufft3d3(fy(:),fx(:),fz(:),r_zone(:),1,1e-2,Y(:),X(:),Z(:));
-                psi_zone = reshape(psi_zone,Ny,Nx,Nz);
+                psi_zone = finufft3d3(fy(:),fx(:),fz(:),r_zone(:),1,1e-2,Y_zone(:),X_zone(:),Z_zone(:));
+                psi_zone = reshape(psi_zone,Ny_im_zone,Nx_im_zone,Nz_sub);
                 % Stitching window in x and y
-                nb = 2*round(overlap2/dx_im); % Number of pixels overlapped
-                windowx = ones(Ny,Nx,Nz); % The window to stitch in x
-                windowy = ones(Ny,Nx,Nz); % The window to stitch in x
-                if ~ismember(min(x_im,[],'all'),x) % If the zone is not on the left of the image
-                    windowx(:,1:nb,:) = (0:1/nb:1-1/nb).*ones(Ny,nb,Nz); % In the overlapping area, the weight of the window declines linearly from 1 to 0
+                nbxy = 2*round(overlap2xy/dx_im); % Number of pixels overlapped
+                windowx = ones(Ny_im_zone,Nx_im_zone,Nz_sub); % The window to stitch in x
+                windowy = ones(Ny_im_zone,Nx_im_zone,Nz_sub); % The window to stitch in x
+                if ~ismember(min(x_im,[],'all'),x_zone) % If the zone is not on the left of the image
+                    windowx(:,1:nbxy,:) = (0:1/nbxy:1-1/nbxy).*ones(Ny_im_zone,nbxy,Nz_sub); % In the overlapping area, the weight of the window declines linearly from 1 to 0
                 end
-                if ~ismember(max(x_im,[],'all'),x) % If the zone is not on the right of the image
-                    windowx(:,end-nb+1:end,:) = fliplr((0:1/nb:1-1/nb).*ones(Ny,nb,Nz));
+                if ~ismember(max(x_im,[],'all'),x_zone) % If the zone is not on the right of the image
+                    windowx(:,end-nbxy+1:end,:) = fliplr((0:1/nbxy:1-1/nbxy).*ones(Ny_im_zone,nbxy,Nz_sub));
                 end
-                if ~ismember(min(y_im,[],'all'),y) % If the zone is not at the top of the image
-                    windowy(1:nb,:,:) = transpose(0:1/nb:1-1/nb).*ones(nb,Nx,Nz);
+                if ~ismember(min(y_im,[],'all'),y_zone) % If the zone is not at the top of the image
+                    windowy(1:nbxy,:,:) = transpose(0:1/nbxy:1-1/nbxy).*ones(nbxy,Nx_im_zone,Nz_sub);
                 end
-                if ~ismember(max(y_im,[],'all'),y) % If the zone is not at the bottom of the image
-                    windowy(end-nb+1:end,:,:) = flipud(transpose(0:1/nb:1-1/nb).*ones(nb,Nx,Nz));
+                if ~ismember(max(y_im,[],'all'),y_zone) % If the zone is not at the bottom of the image
+                    windowy(end-nbxy+1:end,:,:) = flipud(transpose(0:1/nbxy:1-1/nbxy).*ones(nbxy,Nx_im_zone,Nz_sub));
                 end
                 psi_zone = psi_zone.*windowx.*windowy; % Apply the stitching window
                 % Stitching window in z
-                windowz = ones(Ny,Nx,Nz);
-                for jj = 1:nb % Scan each depth in the overlapping region and assign the corresponding weight to that depth
-                    if ~ismember(min(z_im,[],'all'),z) % If it is not the top subvolumes (the volume with smallest z)
-                        windowz(:,:,jj) = (ones(Ny,Nx)*(jj-1)*1/nb);
+                nbz = 2*round(overlap2z/dz_im);
+                windowz = single(ones(Ny_im_zone,Nx_im_zone,Nz_sub));
+                for jj = 1:nbz % Scan each depth in the overlapping region and assign the corresponding weight to that depth
+                    if subvolume_id ~= 1 % If it is not the top subvolumes (the volume with smallest z)
+                        windowz(:,:,jj) = single(sqrt(ones(Ny_im_zone,Nx_im_zone)*(jj-1)*1/nbz));
                     end
-                    if ~ismember(max(z_im,[],'all'),z) % If it is not the bottom subvolumes
-                        windowz(:,:,end-jj+1) = (ones(Ny,Nx)*(jj-1)*1/nb);
+                    if subvolume_id ~= n_sub % If it is not the bottom subvolumes
+                        windowz(:,:,end-jj+1) = single(sqrt(ones(Ny_im_zone,Nx_im_zone)*(jj-1)*1/nbz));
                     end
                 end
                 psi_zone = psi_zone.*windowz; % Apply the stitching window
@@ -129,6 +130,8 @@ function [I] = reconstruct3D(list_x_im,list_y_im,list_z_im,x_im,y_im,z_im,overla
             end
         end
         Psi = Psi+psi_s;
+        toc
+
     end
     % Finally, the volumetric image is
     I = abs(Psi).^2;
@@ -143,5 +146,5 @@ function [I] = reconstruct3D(list_x_im,list_y_im,list_z_im,x_im,y_im,z_im,overla
         end
     end
     
-    save(""+directory_save+"./I_3D_2.mat",'I')
+    save(""+directory_save+"./I_3D_with_overlap_"+n_sub+"_subvolumes.mat",'I')
 end

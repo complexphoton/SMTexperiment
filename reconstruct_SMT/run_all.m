@@ -59,7 +59,8 @@ dz = single(1); dz_im = single(0.2);
 % 8. The image is divided into smaller zones during the wavefront
 % correction procedure. Those zones are overlapped. Specify the
 % half-of-overlapping-area here (micron)
-overlap2 = single(1.2); 
+overlap2xy = single(1.8); 
+overlap2z = single(1);
 
 % 9. Specify the imaging case, either 2D or 3D. If 2D, after correcting the
 % dispersion, we need to find the target's depth, and when reconstructing
@@ -68,7 +69,10 @@ im_case = "3D";
 
 % If the case is "3D", we need to specify the number of subvolumes in the z
 % axis. If "2D" then the number of subvolumes is 1
-n_sub = single(8);
+n_sub = single(7);
+if im_case == "2D"
+    n_sub = 1;
+end
 
 % 10. The image will go through one correction of the full image, then
 % n_divison division steps
@@ -116,7 +120,7 @@ n_slice = 5;
 % That's all one need to put in in order to reconstruct the fully corrected
 % image. 
 
-% I. System coordinates, zoning, Zernike matrices
+%% I. System coordinates, zoning, Zernike matrices
 
 fprintf("System coordinates, zoning, Zernike matrices.\n")
 
@@ -146,7 +150,7 @@ list_x_im = cell(1,1); list_y_im = cell(1,1);
 list_x{1,1} = x; list_y{1,1} = y;
 list_x_im{1,1} = x_im; list_y_im{1,1} = y_im;
 for division_step = 1:n_division
-    [x_step,y_step,x_im_step,y_im_step] = zoning(dx,dx_im,list_x,list_y,list_x_im,list_y_im,division_step,overlap2); 
+    [x_step,y_step,x_im_step,y_im_step] = zoning(dx,dx_im,list_x,list_y,list_x_im,list_y_im,division_step,overlap2xy); 
     % After this step, we obtain the list of x,y,z of the corresponding
     % division step as column cell. We have to put those cells in the
     % correct position in the list_x,y,z cells. The number of zones is
@@ -183,7 +187,7 @@ end
 % Meanwhile, if we do 3D imaging the list of z in each subvolumes will be
 % found by 
 if im_case == "3D"
-    [list_z, list_z_im] = zoning_z(z,dz,dz_im,n_sub,overlap2,z_im); % list_z is a cell containing the z of each
+    [list_z, list_z_im] = zoning_z(z,dz,dz_im,n_sub,overlap2z,z_im); % list_z is a cell containing the z of each
 end
 
 %% II. Compensate dispersion then build the time-gated matrices
@@ -225,7 +229,7 @@ for subvolume_id = 1:n_sub
     if im_case == "2D"
         r_z = single(load(""+directory_save+"r_z_2D.mat").r_z);
     elseif im_case == "3D"
-        r_z = load(""+directory_save+"r_z_3D_"+subvolume_id+"_"+n_slice+"_slices.mat").r_z;
+        r_z = load(""+directory_save+"r_z_3D_"+subvolume_id+"_"+n_slice+"_slices_"+n_sub+"_subvolumes.mat").r_z;
     end
     % Variable division_step = 0 means we are not doing any zone division
     % yet. Variable zone_id = 1 since there is only one zone, which is the
@@ -240,7 +244,7 @@ for subvolume_id = 1:n_sub
     % optimize Zernike coefficients alternatively.
     opt_whole_image = tic;
     if im_case == "3D"
-        wavefront_correction_3D(x,y,r_z,n_slice,division_step,Z,zone_id,subvolume_id,directory_save);
+        wavefront_correction_3D(x,y,r_z,n_slice,division_step,Z,zone_id,subvolume_id,n_sub,directory_save);
     elseif im_case == "2D"
         wavefront_correction_2D(x,y,r_z,division_step,Z,zone_id,subvolume_id,directory_save);
     end
@@ -269,13 +273,13 @@ for subvolume_id = 1:n_sub
             zone_big = ceil(zone_id/4);
             % Load the updated r matrix of the corresponding bigger zone
             prev_step = division_step-1;
-            r_big = single(load(""+directory_save+"r_update_"+prev_step+"_zone_"+zone_big+"_subvolume_"+subvolume_id+"_"+n_slice+"_slices.mat").r_update);
+            r_big = single(load(""+directory_save+"r_update_"+prev_step+"_zone_"+zone_big+"_subvolume_"+subvolume_id+"_"+n_slice+"_slices_"+n_sub+"_subvolumes.mat").r_update);
             % The corresponding x and y of the zone is
             x_zone = list_x{zone_id,division_step+1};
             y_zone = list_y{zone_id,division_step+1};
             % Correct the wavefront of the zone
             if im_case == "3D"
-                wavefront_correction_3D(x_zone,y_zone,r_big,n_slice,division_step,Z,zone_id,subvolume_id,directory_save);
+                wavefront_correction_3D(x_zone,y_zone,r_big,n_slice,division_step,Z,zone_id,subvolume_id,n_sub,directory_save);
             elseif im_case == "2D"
                 wavefront_correction_2D(x_zone,y_zone,r_big,division_step,Z,zone_id,subvolume_id,directory_save);
             end
@@ -285,7 +289,7 @@ for subvolume_id = 1:n_sub
 end
 toc(begin_opt)
 
-%% IV. Reconstruct the image
+% IV. Reconstruct the image
 
 reconstruct = tic;
 
@@ -294,7 +298,7 @@ reconstruct = tic;
 
 fprintf("Reconstructing the image. \n")
 if im_case == "2D"
-    [I] = reconstruct2D(list_x_im,list_y_im,x_im,y_im,overlap2,k,n_division,r_z,directory_save,rad_order_start,rad_order_inc);
+    [I] = reconstruct2D(list_x_im,list_y_im,x_im,y_im,overlap2xy,k,n_division,r_z,directory_save,rad_order_start,rad_order_inc);
     I_show = I/max(I,[],'all');
     I_show = fliplr(I_show.*mask);
     % Display image
@@ -306,7 +310,7 @@ if im_case == "2D"
     caxis([0 0.5])
     set(gca,'Visible','off')
 elseif im_case == "3D"
-    [I] = reconstruct3D(list_x_im,list_y_im,list_z_im,x_im,y_im,z_im,overlap2,k,list_k0,phase_list,list_amp,coef_n1,coef_n2,h1,z_mirror,n_division,directory_r,prefix,directory_save); 
+    [I] = reconstruct3D(list_x_im,list_y_im,list_z_im,x_im,y_im,z_im,overlap2xy,overlap2z,k,list_k0,phase_list,list_amp,coef_n1,coef_n2,h1,z_mirror,n_division,directory_r,prefix,directory_save); 
     % Choose the z (depth, in pixel coordinate) to display 
     % Number of z we want to show
     n_z_show = n_sub;
@@ -332,7 +336,7 @@ elseif im_case == "3D"
         imagesc((I_x));
         colormap('hot')
         axis image
-        caxis([0 0.3])
+        caxis([0 0.5])
         set(gca,'Visible','off')
     end
 end

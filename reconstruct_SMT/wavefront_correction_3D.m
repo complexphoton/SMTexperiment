@@ -1,5 +1,5 @@
 % Function to correct wavefront
-function wavefront_correction_3D(x,y,r_z,n_slice,division_step,Z,zone_id,subvolume_id,directory_save)
+function wavefront_correction_3D(x,y,r_z,n_slice,division_step,Z,zone_id,subvolume_id,n_sub,directory_save)
         
     fprintf("Correcting zone "+zone_id+" division step "+division_step+" subvolume "+subvolume_id+".\n");
     % Inputs: 
@@ -42,14 +42,14 @@ function wavefront_correction_3D(x,y,r_z,n_slice,division_step,Z,zone_id,subvolu
             % 1.2.1. Convert to truncated spatial basis
             % Convert the input to spatial basis
             r_kout_r = zeros(N_big,Nx*Ny); % The reflection matrix whose input is spatial basis, output is angular basis
-            parfor ii = 1:N_big
+            for ii = 1:N_big
                 r_kout_r(ii,:) = finufft2d3(kin_y_big.',kin_x_big.',r_slice(ii,:).',-1,1e-2,Y,X).';
             end
             r_kout_r = single(r_kout_r/N_big);
             clear r_slice
             % Convert the output to spatial basis
             r_r = zeros(Nx*Ny,Nx*Ny); % The matrix whose both input and output are in spatial basis
-            parfor ii = 1:Nx*Ny
+            for ii = 1:Nx*Ny
                 r_r(:,ii) = finufft2d3(-kout_y_big,-kout_x_big,r_kout_r(:,ii),-1,1e-2,Y,X);
             end
             r_r = single(r_r);
@@ -57,14 +57,14 @@ function wavefront_correction_3D(x,y,r_z,n_slice,division_step,Z,zone_id,subvolu
             % 1.2.2. Convert back to angular basis
             % Convert the input to angular basis
             r_r_kin = zeros(Nx*Ny,N); % The matrix whose input is in angular basis, output is spatial basis
-            parfor ii = 1:Nx*Ny
+            for ii = 1:Nx*Ny
                 r_r_kin(ii,:) = finufft2d3(Y,X,r_r(ii,:).',1,1e-2,kin_y.',kin_x.').';
             end
             r_r_kin = single(r_r_kin/(Nx*Ny));
             clear r_r
             % Convert the output to angular basis
             r_k_slice = zeros(N,N); % The matrix in angular basis
-            parfor ii = 1:N
+            for ii = 1:N
                 r_k_slice(:,ii) = finufft2d3(Y,X,r_r_kin(:,ii),1,1e-2,-kout_y,-kout_x);
             end
             r_k_slice = single(r_k_slice);
@@ -120,7 +120,7 @@ function wavefront_correction_3D(x,y,r_z,n_slice,division_step,Z,zone_id,subvolu
         for slice_id = 1:n_slice
             r_in_slice = r_in_update((slice_id-1)*N+1:slice_id*N,:);
             Psi_in_slice = zeros(Nx*Ny,N);
-            parfor ii = 1:N
+            for ii = 1:N
                 Psi_in_slice(:,ii) = finufft2d3(fy(:,ii),fx(:,ii),r_in_slice(:,ii),1,1e-2,Y,X);
             end
             Psi_in = vertcat(Psi_in,Psi_in_slice);
@@ -160,7 +160,7 @@ function wavefront_correction_3D(x,y,r_z,n_slice,division_step,Z,zone_id,subvolu
         for slice_id = 1:n_slice
             r_out_slice = r_out_update((slice_id-1)*N+1:slice_id*N,:);
             Psi_out_slice = zeros(Nx*Ny,N);
-            parfor ii = 1:N
+            for ii = 1:N
                 Psi_out_slice(:,ii) = finufft2d3(fy(ii,:).',fx(ii,:).',r_out_slice(:,ii),1,1e-2,Y,X);
             end
             Psi_out = vertcat(Psi_out, Psi_out_slice);
@@ -202,8 +202,8 @@ function wavefront_correction_3D(x,y,r_z,n_slice,division_step,Z,zone_id,subvolu
     axis image
     colormap('hot')
     
-    save(""+directory_save+"c_in_"+division_step+"_zone_"+zone_id+"_subvolume_"+subvolume_id+"_2.mat",'c_in');
-    save(""+directory_save+"c_out_"+division_step+"_zone_"+zone_id+"_subvolume_"+subvolume_id+"_2.mat",'c_out');
-    save(""+directory_save+"r_update_"+division_step+"_zone_"+zone_id+"_subvolume_"+subvolume_id+"_"+n_slice+"_slices.mat",'r_update');
+    save(""+directory_save+"c_in_"+division_step+"_zone_"+zone_id+"_subvolume_"+subvolume_id+"_out_of_"+n_sub+".mat",'c_in');
+    save(""+directory_save+"c_out_"+division_step+"_zone_"+zone_id+"_subvolume_"+subvolume_id+"_out_of_"+n_sub+".mat",'c_out');
+    save(""+directory_save+"r_update_"+division_step+"_zone_"+zone_id+"_subvolume_"+subvolume_id+"_"+n_slice+"_slices_"+n_sub+"_subvolumes.mat",'r_update');
 
 end
