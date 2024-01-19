@@ -188,7 +188,7 @@ z_truncate = z(z >= z_max-range_z/2 & z <= z_max+range_z/2);
 z_truncate_min = z_truncate(1); z_truncate_max = z_truncate(end);
 
 fprintf("Do time domain truncation.\n")
-t_truncation_no_index_mismatch_correction(directory_r,prefix,list_k0,z_truncate_min,z_truncate_max,z_ref_air,z_prime_max,k,coef_n2,coef_n1,h1);
+t_truncation_no_index_mismatch_correction(directory_r,prefix,list_k0,z_truncate_min,z_truncate_max,z_ref_air,k,coef_n2,coef_n1,h1);
 
 %% III. Compensate for dispersion and build time-gated reflection matrices
 % Build 3D image
