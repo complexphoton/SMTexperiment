@@ -1,5 +1,5 @@
 % Function to reconstruct the fully corrected 2D SMT image
-function [I] = reconstruct2D_vrm(x_im,y_im,k,directory_r,z_max,z_prime_max,z_ref_air,h1,coef_n1,coef_n2,list_k0,directory_save)
+function [I] = reconstruct2D_vrm(x_im,y_im,k,directory_r,prefix,z_max,z_prime_max,z_ref_air,h1,coef_n1,coef_n2,list_k0,directory_save)
 %%
     n_freq = length(list_k0);
     N = length(k);
@@ -25,7 +25,7 @@ function [I] = reconstruct2D_vrm(x_im,y_im,k,directory_r,z_max,z_prime_max,z_ref
         kz_out = (-sqrt(k0^2-kx_out.^2-ky_out.^2));
         fz0 = (kz_out-kz_in);
         
-        r = load(""+directory_r+"r_truncated_"+i_freq+".mat").r;
+        r = load(""+directory_r+""+prefix+""+i_freq+".mat").r_pad;
 
         time = (n2*z_max-(z_prime_max+z_ref_air+h1)+n1*h1)/300;
 
