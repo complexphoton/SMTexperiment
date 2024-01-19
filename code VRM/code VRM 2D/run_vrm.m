@@ -188,7 +188,7 @@ z_truncate = z(z >= z_max-range_z/2 & z <= z_max+range_z/2);
 z_truncate_min = z_truncate(1); z_truncate_max = z_truncate(end);
 
 fprintf("Do time domain truncation.\n")
-t_truncation_no_index_mismatch_correction(directory_r,prefix,list_k0,z_truncate_min,z_truncate_max,z_ref_air,k,coef_n2,coef_n1,h1);
+t_truncation_no_index_mismatch_correction(directory_r,prefix,list_k0,z_truncate_min,z_truncate_max,z_ref_air,z_prime_max,k,coef_n2,coef_n1,h1);
 
 %% III. Compensate for dispersion and build time-gated reflection matrices
 % Build 3D image
@@ -251,7 +251,7 @@ wavefront_correction_vrm_2D(x,y,k,r_z,directory_save);
 [mask] = build_mask(x_im,y_im,wx0,wy0,x0,y0,rho);
 
 fprintf("Reconstructing the image. \n")
-[I] = reconstruct2D_vrm(x_im,y_im,k,directory_r,prefix,z_max,z_prime_max,z_ref_air,h1,coef_n1,coef_n2,list_k0,directory_save);
+[I] = reconstruct2D_vrm(x_im,y_im,k,directory_r,z_max,z_prime_max,z_ref_air,h1,coef_n1,coef_n2,list_k0,directory_save);
 
 I_show = I.*mask;
 I_show = fliplr(I_show);
@@ -259,6 +259,7 @@ I_show = fliplr(I_show);
 figure
 imagesc(I_show);
 cmap_heat
+caxis([0 3e19])
 axis image
 colorbar
 cbh = colorbar ; %Create Colorbar

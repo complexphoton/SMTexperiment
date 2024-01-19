@@ -1,4 +1,4 @@
-function t_truncation_no_index_mismatch_correction(directory_r,prefix,list_k0,z_truncate_min,z_truncate_max,z_ref_air,k,coef_n2,coef_n1,h1)
+function t_truncation_no_index_mismatch_correction(directory_r,prefix,list_k0,z_truncate_min,z_truncate_max,z_ref_air,z_prime_max,k,coef_n2,coef_n1,h1)
 
     % 1. Info
     % Central frequency
@@ -36,9 +36,9 @@ function t_truncation_no_index_mismatch_correction(directory_r,prefix,list_k0,z_
        
         for ii = 1:Nz_truncate
             z_ii = z_truncate(ii);
-            time = (n2*z_ii-(z_ref_air+h1)+n1*h1)/300;
+            time = (n2*z_ii-(z_prime_max+z_ref_air+h1)+n1*h1)/300;
             fprintf("Building rz at frequency "+i_freq+", z = "+z_ii+".\n")
-            R_z{ii,1} = R_z{ii,1}+1/n_freq*exp(-2*1i*omega*time)*r;
+            R_z{ii,1} = R_z{ii,1}+1/n_freq*exp(-2*1i*omega*time)*r.*exp(1i*mod(fz0*z_prime_max,2*pi));
         end
     end
     
@@ -55,12 +55,12 @@ function t_truncation_no_index_mismatch_correction(directory_r,prefix,list_k0,z_
         r = single(zeros(N,N));
         for ii = 1:Nz_truncate
             z_ii = z_truncate(ii); 
-            time = (n2*z_ii-(z_ref_air+h1)+n1*h1)/300;
+            time = (n2*z_ii-(z_prime_max+z_ref_air+h1)+n1*h1)/300;
             fprintf("Building R at frequency "+i_freq+", z = "+z_ii+".\n")
             
             r_z = R_z{ii};
 
-            r = r+exp(2*1i*omega*time)*r_z;
+            r = r+exp(2*1i*omega*time)*r_z.*exp(-1i*mod(fz0*z_prime_max,2*pi));
         end
 
         save(""+directory_r+"r_truncated_"+i_freq+".mat",'r')
