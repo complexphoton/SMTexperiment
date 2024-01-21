@@ -69,7 +69,7 @@ im_case = "3D";
 
 % If the case is "3D", we need to specify the number of subvolumes in the z
 % axis. If "2D" then the number of subvolumes is 1
-n_sub = single(7);
+n_sub = 16;
 if im_case == "2D"
     n_sub = 1;
 end
