@@ -20,7 +20,6 @@ function dispersion_VRM(directory_r,z_sub_ref,list_k0,k,id_sub,coef_n2)
     r_center = r_center.*exp(1i*fz*z_sub_ref);
     
     % 2. Build matrices
-    r0 = single(zeros(N,N));
     for i_freq = 1:n_freq
         fprintf("Working with frequency"+i_freq+"\n")
         
@@ -57,16 +56,7 @@ function dispersion_VRM(directory_r,z_sub_ref,list_k0,k,id_sub,coef_n2)
             figure(4)
             plot(phi_in_list)
         end
-        r0 = r0+r;
-        
-        x = single(0:0.7:50); y = x; Nx = length(x); [X,Y] = meshgrid(x,y);
-        I = reshape(abs(finufft2d3(fy(:),fx(:),r0(:),1,1e-2,Y(:),X(:))).^2,Nx,Nx);
-        
-        figure(1)
-        imagesc(fliplr(interp2(I,3)))
-        axis image
-        colormap('hot')
-        
+       
         % Save the corrected matrix
         save(""+directory_r+"r_vrm_"+i_freq+"_subvolume_"+id_sub+".mat",'r','phi_in','phi_out')
     end
