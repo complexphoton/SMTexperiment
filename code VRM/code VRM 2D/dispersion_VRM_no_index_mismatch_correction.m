@@ -37,9 +37,9 @@ function dispersion_VRM_no_index_mismatch_correction(directory_r,directory_save,
         r = exp(-2*1i*omega*time)*r.*exp(1i*fz0*z_prime_max);
         
         % Do the iterative dispersion correction
-        mean_phi = pi; N = width(r);
+        max_phi = pi; N = width(r);
         phi_out = zeros(N,1); phi_in = zeros(N,1);
-        while mean_phi > pi/18
+        while max_phi > pi/18
             
             % Correct output dispersion
             phi_out_list = angle(diag(r*r_center'));
@@ -52,7 +52,7 @@ function dispersion_VRM_no_index_mismatch_correction(directory_r,directory_save,
             r = r*diag(exp(-1i*phi_in_list));
             
             phi_list = vertcat(phi_in_list(phi_in_list ~= 0), phi_out_list(phi_out_list ~= 0));
-            mean_phi = mean(abs(phi_list),'all')
+            max_phi = max(abs(phi_list),[],'all')
             
             phi_out = phi_out+phi_out_list; phi_in = phi_in+phi_in_list;
         end
