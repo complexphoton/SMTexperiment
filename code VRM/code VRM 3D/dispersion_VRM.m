@@ -35,9 +35,9 @@ function dispersion_VRM(directory_r,z_sub_ref,list_k0,k,id_sub,coef_n2)
         r = r.*exp(1i*fz*z_sub_ref);
         
         % Do the iterative dispersion correction
-        mean_phi = pi; N = width(r);
+        max_phi = pi; N = width(r);
         phi_out = zeros(N,1); phi_in = zeros(N,1);
-        while mean_phi > pi/8
+        while max_phi > pi/18
             
             % Correct output dispersion
             phi_out_list = angle(diag(r*r_center'));
@@ -50,7 +50,7 @@ function dispersion_VRM(directory_r,z_sub_ref,list_k0,k,id_sub,coef_n2)
             r = r*diag(exp(-1i*phi_in_list));
             
             phi_list = vertcat(phi_in_list(phi_in_list ~= 0), phi_out_list(phi_out_list ~= 0));
-            mean_phi = mean(abs(phi_list),'all')
+            max_phi = max(abs(phi_list),[],'all')
             
             phi_out = phi_out+phi_out_list; phi_in = phi_in+phi_in_list;
             
