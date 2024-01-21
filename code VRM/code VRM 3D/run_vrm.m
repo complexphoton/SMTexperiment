@@ -13,7 +13,7 @@ begin_all = tic;
 
 lx_offset = single(25); lx_im = single(50);
 ly_offset = single(25); ly_im = single(50);
-lz_offset = single(1522); lz_im = single(110);
+lz_offset = single(1525); lz_im = single(110);
 
 % 2. Provide the path to input data. We recommend saving all required input 
 % data at the same directory, including the reflection matrices, k list, k0 
@@ -100,7 +100,7 @@ end
 
 % 16. Truncation range in z for 2D imaging case
 if im_case == "2D"
-    range_z = 15;
+    range_z = 9;
 end
 % That's all one need to put in in order to reconstruct the fully corrected
 % image. 
