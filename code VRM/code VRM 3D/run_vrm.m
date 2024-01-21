@@ -311,7 +311,7 @@ elseif im_case == "3D"
     % Choose the z (depth, in pixel coordinate) to display 
     % Show enface image: choose the z (depth, in pixel coordinate) to display 
     n_z_show = n_sub;
-    z_display = round(550/(n_z_show+1)*[1:1:n_z_show]);
+    z_display = round(Nz_im/(n_z_show+1)*[1:1:n_z_show]);
     for ii = z_display
         I_z = I(:,:,ii);
         I_z = I_z/max(I,[],'all');
