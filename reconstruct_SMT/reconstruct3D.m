@@ -117,10 +117,10 @@ function [I] = reconstruct3D(list_x_im,list_y_im,list_z_im,x_im,y_im,z_im,overla
                 windowz = single(ones(Ny_im_zone,Nx_im_zone,Nz_sub));
                 for jj = 1:nbz % Scan each depth in the overlapping region and assign the corresponding weight to that depth
                     if subvolume_id ~= 1 % If it is not the top subvolumes (the volume with smallest z)
-                        windowz(:,:,jj) = single(sqrt(ones(Ny_im_zone,Nx_im_zone)*(jj-1)*1/nbz));
+                        windowz(:,:,jj) = single((ones(Ny_im_zone,Nx_im_zone)*(jj-1)*1/nbz)).^0.75;
                     end
                     if subvolume_id ~= n_sub % If it is not the bottom subvolumes
-                        windowz(:,:,end-jj+1) = single(sqrt(ones(Ny_im_zone,Nx_im_zone)*(jj-1)*1/nbz));
+                        windowz(:,:,end-jj+1) = single((ones(Ny_im_zone,Nx_im_zone)*(jj-1)*1/nbz)).^0.75;
                     end
                 end
                 psi_zone = psi_zone.*windowz; % Apply the stitching window
