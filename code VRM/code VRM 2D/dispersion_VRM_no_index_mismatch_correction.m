@@ -22,7 +22,6 @@ function dispersion_VRM_no_index_mismatch_correction(directory_r,directory_save,
     r_center = exp(-2*1i*omega*time)*r_center.*exp(1i*fz0*z_prime_max);
     
     % 2. Build matrices
-    r0 = single(zeros(N,N));
     for i_freq = 1:n_freq
         fprintf("Working with frequency"+i_freq+"\n")
         
