@@ -57,7 +57,7 @@ overlap2 = 0;
 
 % 9. If the case is "3D", we need to specify the number of subvolumes in the z
 % axis. If "2D" then the number of subvolumes is 1
-n_sub = 8;
+n_sub = 16;
 
 % 10. List of laser amplitude at all frequencies
 list_amp = load(""+directory_r+"/list_amp.mat").list_amp_ave;
@@ -203,8 +203,10 @@ for id_sub = 1:n_sub
         z_truncate_min = z_max-range_z/2;
         z_truncate_max = z_max+range_z/2;
     elseif im_case == "3D"
-        z_truncate_min = z_sub_min;
-        z_truncate_max = z_sub_max;
+        % Due to dispersion, the particles will be shifted and/or spread to
+        % a larger volume than the subvolume we are imaging
+        z_truncate_min = z_sub_min-7.5;
+        z_truncate_max = z_sub_max+7.5;
     end
     
     fprintf("Do time domain truncation for subvolume "+id_sub+".\n")
