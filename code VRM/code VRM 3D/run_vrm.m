@@ -205,8 +205,8 @@ for id_sub = 1:n_sub
     elseif im_case == "3D"
         % Due to dispersion, the particles will be shifted and/or spread to
         % a larger volume than the subvolume we are imaging
-        z_truncate_min = z_sub_min-7.5;
-        z_truncate_max = z_sub_max+7.5;
+        z_truncate_min = z_sub_min-5;
+        z_truncate_max = z_sub_max+5;
     end
     
     fprintf("Do time domain truncation for subvolume "+id_sub+".\n")
