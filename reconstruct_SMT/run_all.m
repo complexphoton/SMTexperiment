@@ -317,12 +317,12 @@ elseif im_case == "3D"
     z_display = round(length(z_im)/(n_z_show+1)*[1:1:n_z_show]);
     for ii = z_display
         I_z = I(:,:,ii);
-        I_z = I_z/max(I_z,[],'all');
+        I_z = I_z/max(I,[],'all');
         figure
         imagesc(fliplr(I_z));
         colormap('hot')
         axis image
-        caxis([0 0.5])
+        caxis([0 0.15])
         set(gca,'Visible','off')
     end
     
@@ -331,12 +331,12 @@ elseif im_case == "3D"
     x_display = round(length(x_im)/(n_x_show+1)*[1:1:n_x_show]);
     for ii = x_display
         I_x = I(:,ii,:); I_x = I_x(:); I_x = reshape(I_x,Ny_im,Nz_im);
-        I_x = I_x/max(I_x,[],'all');
+        I_x = I_x/max(I,[],'all');
         figure
         imagesc((I_x));
         colormap('hot')
         axis image
-        caxis([0 0.5])
+        caxis([0 0.15])
         set(gca,'Visible','off')
     end
 end
