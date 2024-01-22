@@ -49,8 +49,8 @@ function wavefront_correction_vrm_2D(x,y,k,r_z,subvolume_id,directory_save)
     fx_out = fx.'; fy_out = fy.';
     
     % 4. Optimization
-    delta_M = 1; % The change of FOM after each optimization loop
-    while delta_M > 0.1
+    max_phi = pi; % The maximum value of |phi_in| and |phi_out| in each iteration
+    while max_phi > pi/18
         M_prev = M; % Update the FOM of the previous loop
         
         % 4.1. Optimize input
@@ -85,10 +85,9 @@ function wavefront_correction_vrm_2D(x,y,k,r_z,subvolume_id,directory_save)
         
         psi = Psi_out*exp(1i*phi_out);
         I = abs(psi).^2;
-        M = sum(I,'all');
-                
-        % 4.3. Update the FOM change
-        delta_M = (M-M_prev)/abs(M_prev); 
+        
+        % 4.3. Update the maximum phase change
+        max_phi = max(vertcat(abs(phi_in),abs(phi_out)),[],'all'); 
     end
     
     % 5. Update the reflection matrix of the zone, save the matrix and the
