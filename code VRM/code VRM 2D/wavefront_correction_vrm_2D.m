@@ -48,8 +48,8 @@ function wavefront_correction_vrm_2D(x,y,k,r_z,directory_save)
     fx_out = fx.'; fy_out = fy.';
     
     % 4. Optimization
-    delta_M = 1; % The change of FOM after each optimization loop
-    while delta_M > 0.1
+    max_phi = pi; % The maximum value of |phi_in| and |phi_out| in each iteration
+    while max_phi > pi/18
         M_prev = M; % Update the FOM of the previous loop
         
         % 4.1. Optimize input
@@ -81,30 +81,14 @@ function wavefront_correction_vrm_2D(x,y,k,r_z,directory_save)
         r_out_update = r_out_update.*exp(1i*phi_out.');
         
         phi_out_tot = phi_out+phi_out_tot;
-        
-        psi = Psi_out*exp(1i*phi_out);
-        I = abs(psi).^2;
-        M = sum(I,'all');
                 
-        % 4.3. Update the FOM change
-        delta_M = (M-M_prev)/abs(M_prev); 
+        % 4.3. Update the maximum phase change
+        max_phi = max(vertcat(abs(phi_in),abs(phi_out)),[],'all'); 
     end
     
-    % 5. Update the reflection matrix of the zone, save the matrix and the
-    % phases
-    r_update = r_in_update;   
-    
+    % 5. Save the phases    
     phi_in = phi_in_tot; phi_out = phi_out_tot;
-   
-    psi = finufft2d3(fy(:),fx(:),r_update(:),1,1e-2,Y,X);
-    I = abs(psi).^2;
-    I_zone = reshape(I,Ny,Nx);
 
-    figure(2)
-    imagesc(fliplr(interp2(I_zone,2.5)));
-    axis image
-    colormap('hot')
-   
     save(""+directory_save+"phi_in_vrm.mat",'phi_in');
     save(""+directory_save+"phi_out_vrm.mat",'phi_out');
 end
