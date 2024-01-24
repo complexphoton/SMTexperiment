@@ -75,10 +75,10 @@ function [I] = reconstruct3D_vrm(list_z_im,x_im,y_im,dz_im,z_im,overlap2,k,list_
             nb = 2*round(overlap2/dz_im); % Number of pixels overlapped
             windowz = single(ones(Ny,Nx,Nz_sub));
             for jj = 1:nb % Scan each depth in the overlapping region and assign the corresponding weight to that depth
-                if ~ismember(min(z_im,[],'all'),z_sub) % If it is not the top subvolumes (the volume with smallest z)
+                if id_sub ~= 1 % If it is not the top subvolumes (the volume with smallest z)
                     windowz(:,:,jj) = single(ones(Ny,Nx)*(jj-1)*1/nb).^0.75;
                 end
-                if ~ismember(max(z_im,[],'all'),z_sub) % If it is not the bottom subvolumes
+                if id_sub ~= n_sub % If it is not the bottom subvolumes
                     windowz(:,:,end-jj+1) = single(ones(Ny,Nx)*(jj-1)*1/nb).^0.75;
                 end
             end
