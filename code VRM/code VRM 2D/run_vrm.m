@@ -251,7 +251,7 @@ wavefront_correction_vrm_2D(x,y,k,r_z,directory_save);
 [mask] = build_mask(x_im,y_im,wx0,wy0,x0,y0,rho);
 
 fprintf("Reconstructing the image. \n")
-[I] = reconstruct2D_vrm(x_im,y_im,k,directory_r,z_max,z_prime_max,z_ref_air,h1,coef_n1,coef_n2,list_k0,directory_save);
+[I] = reconstruct2D_vrm(x_im,y_im,k,directory_r,z_max,z_prime_max,z_ref_air,h1,coef_n1,coef_n2,list_k0,directory_save,prefix);
 
 I_show = I.*mask;
 I_show = fliplr(I_show);
