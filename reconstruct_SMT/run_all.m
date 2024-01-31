@@ -117,6 +117,10 @@ rho = single(0);
 % 17. If doing 3D imaging, how many slices per subvolume do we want to optimize
 n_slice = 5;
 
+% 18. In 3D imaging, do you want a 2nd dispersion compensation right after the 
+% wavefront correction to further enhance the axial resolution?
+dispersion_2nd = 1;
+
 % That's all one need to put in in order to reconstruct the fully corrected
 % image. 
 
@@ -288,6 +292,10 @@ for subvolume_id = 1:n_sub
     end
 end
 toc(begin_opt)
+% If a 2nd dispersion compensation is performed
+if im_case == "3D" & dispersion_2nd == 1
+    dispersion_2nd_time(list_z,list_x,list_y,dx,overlap2xy,n_division,k,list_k0,coef_n1,coef_n2,directory_save,directory_r,prefix,z_mirror,h1);
+end
 
 % IV. Reconstruct the image
 
@@ -310,7 +318,12 @@ if im_case == "2D"
     caxis([0 0.5])
     set(gca,'Visible','off')
 elseif im_case == "3D"
-    [I] = reconstruct3D(list_x_im,list_y_im,list_z_im,x_im,y_im,z_im,overlap2xy,overlap2z,k,list_k0,phase_list,list_amp,coef_n1,coef_n2,h1,z_mirror,n_division,directory_r,prefix,directory_save); 
+    % If the 2nd dispersion is not performed
+    if dispersion_2nd == 0
+        [I] = reconstruct3D(list_x_im,list_y_im,list_z_im,x_im,y_im,z_im,overlap2xy,overlap2z,k,list_k0,phase_list,list_amp,coef_n1,coef_n2,h1,z_mirror,n_division,directory_r,prefix,directory_save); 
+    elseif dispersion_2nd == 1
+        [I] = reconstruct3D_2nd_dispersion(list_x_im,list_y_im,list_z_im,x_im,y_im,z_im,overlap2xy,overlap2z,k,list_k0,list_amp,coef_n1,coef_n2,h1,z_mirror,n_division,directory_r,prefix,directory_save);
+    end
     % Choose the z (depth, in pixel coordinate) to display 
     % Number of z we want to show
     n_z_show = n_sub;
