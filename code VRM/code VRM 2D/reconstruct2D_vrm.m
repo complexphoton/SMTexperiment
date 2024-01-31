@@ -54,8 +54,8 @@ function [I] = reconstruct2D_vrm(x_im,y_im,k,directory_r,z_max,z_prime_max,z_ref
     I = reshape(I,Ny,Nx);
     % Without wavefront correction but with dispersion compensation
     psi_disp = finufft2d3(fy(:),fx(:),r_z(:),1,1e-2,Y(:),X(:));
-    I_disp = abs(psi).^2;
-    I_disp = reshape(I,Ny,Nx);
+    I_disp = abs(psi_disp).^2;
+    I_disp = reshape(I_disp,Ny,Nx);
     
     % Save the image
     save(""+directory_save+"./I_2D_vrm.mat",'I','I_disp')
