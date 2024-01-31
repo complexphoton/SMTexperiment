@@ -1,6 +1,6 @@
 function dispersion_2nd_time(list_z,list_x,list_y,dx,overlap2xy,n_division,k,list_k0,coef_n1,coef_n2,directory_save,directory_r,prefix,z_mirror,h1)
     % Load the volume dispersion phase
-    phase_list = load(""+directory_save+"./phase_list_"+im_case+"_single.mat".phase_list;
+    phase_list = load(""+directory_save+"./phase_list_"+im_case+"_single.mat").phase_list;
     % The function to compensate for dispersion
     n_sub = length(list_z); % Number of subvolumes
     n_zone = 2^(n_division*2); % Number of zones
