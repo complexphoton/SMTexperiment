@@ -54,8 +54,8 @@ function [I_2d_scan] = reconstruct3D_2nd_dispersion(list_x_im,list_y_im,list_z_i
         psi_s_seq = zeros(length(x_im),length(y_im),length(z_im));
         for subvolume_id = 1:n_sub
             % Load the dispersion phase
-            phase_list_2d = load(""+directory_save+"./phase_list_"+im_case+"_2nd_time_subvolume_"+subvolume_id+"_2d_scan.mat").phase_list_2;
-            phase_list_seq = load(""+directory_save+"./phase_list_"+im_case+"_2nd_time_subvolume_"+subvolume_id+".mat").phase_list_2;
+            phase_list_2d = load(""+directory_save+"./phase_list_3D_2nd_time_subvolume_"+subvolume_id+"_2d_scan.mat").phase_list_2;
+            phase_list_seq = load(""+directory_save+"./phase_list_3D_2nd_time_subvolume_"+subvolume_id+".mat").phase_list_2;
             % Normalize with laser amplitude
             r_subvolume = r./list_amp(i_freq);
             r_subvolume = reshape(r_subvolume,N,N);
