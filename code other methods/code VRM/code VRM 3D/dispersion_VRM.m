@@ -1,0 +1,64 @@
+function dispersion_VRM(directory_r,z_sub_ref,list_k0,k,id_sub,coef_n2)
+    
+    % 1. Setting
+    % k space
+    kx = k(:,1); ky = k(:,2); N = length(k); fx = kx-kx.'; fy = ky-ky.';
+    % The number of frequency
+    n_freq = length(list_k0);
+    
+    % The central frequency
+    i_freq_center = round(n_freq/2); k0 = list_k0(i_freq_center); 
+    freq = 3e2*k0/2/pi; freqc = 3e2*k0/2/pi; dfreq = freq-freqc;
+    n_media = coef_n2(1) + coef_n2(2)*dfreq + coef_n2(3)*dfreq.^2 + coef_n2(4)*dfreq.^3 + coef_n2(5)*dfreq.^4;
+    
+    % Load reflection matrix of the center frequency
+    r_center = load(""+directory_r+"r_truncated_"+i_freq_center+"_subvolume_"+id_sub+".mat").r;
+    
+    % Propagate to z_sub_ref
+    kz = (sqrt(k0^2*n_media^2-kx.^2-ky.^2));
+    fz = (-kz-kz.');
+    r_center = r_center.*exp(1i*fz*z_sub_ref);
+    
+    % 2. Build matrices
+    for i_freq = 1:n_freq
+        fprintf("Working with frequency"+i_freq+"\n")
+        
+        k0 = list_k0(i_freq); freq = 3e2*k0/2/pi; dfreq = freq-freqc;
+        n_media = coef_n2(1) + coef_n2(2)*dfreq + coef_n2(3)*dfreq.^2 + coef_n2(4)*dfreq.^3 + coef_n2(5)*dfreq.^4;
+    
+        % Load the reflection matrix at this frequency
+        r = load(""+directory_r+"r_truncated_"+i_freq+"_subvolume_"+id_sub+".mat").r;
+        % Propagate to z_sub_ref
+        kz = (sqrt(k0^2*n_media^2-kx.^2-ky.^2));
+        fz = (-kz-kz.');
+        r = r.*exp(1i*fz*z_sub_ref);
+        
+        % Do the iterative dispersion correction
+        max_phi = pi; N = width(r);
+        phi_out = zeros(N,1); phi_in = zeros(N,1);
+        while max_phi > pi/18
+            
+            % Correct output dispersion
+            phi_out_list = angle(diag(r*r_center'));
+            
+            r = diag(exp(-1i*phi_out_list))*r;
+            
+            % Correct input dispersion
+            phi_in_list = angle(diag(transpose(r)*conj(r_center)));
+            
+            r = r*diag(exp(-1i*phi_in_list));
+            
+            phi_list = vertcat(phi_in_list(phi_in_list ~= 0), phi_out_list(phi_out_list ~= 0));
+            max_phi = max(abs(phi_list),[],'all')
+            
+            phi_out = phi_out+phi_out_list; phi_in = phi_in+phi_in_list;
+            
+            figure(4)
+            plot(phi_in_list)
+        end
+       
+        % Save the corrected matrix
+        save(""+directory_r+"r_vrm_"+i_freq+"_subvolume_"+id_sub+".mat",'r','phi_in','phi_out')
+    end
+    
+end
